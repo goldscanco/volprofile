@@ -1,1 +1,1 @@
-from .main import getVP, plot
+from .main import getVP, plot, getKMaxBars

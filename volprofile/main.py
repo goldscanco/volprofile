@@ -3,6 +3,7 @@ import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
 from plotly.subplots import make_subplots
+import math
 
 from volprofile.cfg import path
 
@@ -44,6 +45,33 @@ def getVP(df: pd.DataFrame, nBins: int = 20):
     return res
 
 
+def getKMaxBars(df: pd.DataFrame, k: int):
+    """input parameters
+        df: pd.DataFrame -> result of getVP function
+        k: int -> get at most kMaxBars
+       return -> filter rows 
+    """
+
+    return df.nlargest(k, ['aggregateVolume'])
+
+
+def getUnusualIncreasingBars(df: pd.DataFrame, isUpward: bool):
+    """input parameters
+        df: pd.DataFrame -> result of getVP function
+        isUpward: bool -> check increments in upward direction
+       return -> filter rows 
+    """
+    if not isUpward:
+        df = df.iloc[::-1]
+
+    df['MA3'] = df['aggregateVolume'].rolling(3).mean()
+    df['diff'] = (df['aggregateVolume'] / df['MA3']) * 100 - 100
+    std = df['diff'].std()
+    df['significance'] = df['diff'] > (math.pi / 2) * std
+
+    return df[df['significance'] == True]
+
+
 def plot(df: pd.DataFrame, price):
     """plot output of getVP
     """
@@ -70,7 +98,7 @@ def _test():
     df['price'] = (df['high'] + df['low']) / 2
 
     res = getVP(df)
-
+    # print(getUnusualIncreasingBars(res, False))
     plot(res, df.price)
 
 
