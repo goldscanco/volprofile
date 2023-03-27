@@ -16,16 +16,12 @@ def getVP(df: pd.DataFrame, nBins: int = 20):
     volume_seri = df['volume'].to_numpy()
     price_seri = df['price'].to_numpy()
 
-    if len(volume_seri) != len(price_seri):
-        raise ValueError("len(volume) does not equal len(price)")
-
     minPrice, maxPrice = np.min(price_seri), np.max(price_seri)
 
     step = (maxPrice - minPrice) / nBins
     idxs = (price_seri - minPrice) // step
 
     idxs[idxs >= nBins] = nBins - 1
-    idxs[idxs < 0] = 0
 
     volumes = [0] * nBins
     res: pd.DataFrame = pd.DataFrame(
@@ -35,8 +31,9 @@ def getVP(df: pd.DataFrame, nBins: int = 20):
         volumes[int(key)] += volume_seri[i]
 
     for i in range(nBins):
-        res.loc[i] = [getPrice(i, step, minPrice) - step / 2,
-                      getPrice(i, step, minPrice) + step / 2, volumes[i]]
+        res.loc[i] = [getPrice(i, step, minPrice) - step / 2, # min
+                      getPrice(i, step, minPrice) + step / 2, # max
+                      volumes[i]]                             # aggVolume
 
     return res
 
