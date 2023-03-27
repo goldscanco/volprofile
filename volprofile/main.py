@@ -42,21 +42,10 @@ def getVP(df: pd.DataFrame, nBins: int = 20):
 
 
 def getKMaxBars(df: pd.DataFrame, k: int):
-    """input parameters
-        df: pd.DataFrame -> result of getVP function
-        k: int -> get at most kMaxBars
-       return -> filter rows
-    """
-
     return df.nlargest(k, ['aggregateVolume'])
 
 
 def getUnusualIncreasingBars(df: pd.DataFrame, isUpward: bool):
-    """input parameters
-        df: pd.DataFrame -> result of getVP function
-        isUpward: bool -> check increments in upward direction
-       return -> filter rows
-    """
     if not isUpward:
         df = df.iloc[::-1]
 
@@ -69,8 +58,6 @@ def getUnusualIncreasingBars(df: pd.DataFrame, isUpward: bool):
 
 
 def plot(df: pd.DataFrame, price):
-    """plot output of getVP
-    """
     from plotly.subplots import make_subplots
     fig = make_subplots(rows=1, cols=2)
     fig.add_trace(go.Bar(
