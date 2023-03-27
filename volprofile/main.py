@@ -2,20 +2,16 @@
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
-from plotly.subplots import make_subplots
 import math
 
-from volprofile.cfg import path
+from volprofile.cfg import TEST_PATH
 
 
 def getVP(df: pd.DataFrame, nBins: int = 20):
     """
-    Args:
-        df (pd.DataFrame): must consist of two keys at least 1-`volume` 2-`price`
-        nBins (int, optional): number of buckets. Defaults to 20.
-
     Returns:
-        df (pd.DataFrame): consists of `minPrice` and `maxPrice` and `aggregateVolume`
+        df (pd.DataFrame): consists of `minPrice` and
+        `maxPrice` and `aggregateVolume`
     """
     volume_seri = df['volume'].to_numpy()
     price_seri = df['price'].to_numpy()
@@ -49,7 +45,7 @@ def getKMaxBars(df: pd.DataFrame, k: int):
     """input parameters
         df: pd.DataFrame -> result of getVP function
         k: int -> get at most kMaxBars
-       return -> filter rows 
+       return -> filter rows
     """
 
     return df.nlargest(k, ['aggregateVolume'])
@@ -59,7 +55,7 @@ def getUnusualIncreasingBars(df: pd.DataFrame, isUpward: bool):
     """input parameters
         df: pd.DataFrame -> result of getVP function
         isUpward: bool -> check increments in upward direction
-       return -> filter rows 
+       return -> filter rows
     """
     if not isUpward:
         df = df.iloc[::-1]
@@ -84,7 +80,7 @@ def plot(df: pd.DataFrame, price):
         orientation='h'), row=1, col=2)
 
     fig.add_trace(go.Scatter(name='close', y=price,
-                             mode='lines', marker_color='#D2691E'), row=1, col=1)
+                  mode='lines', marker_color='#D2691E'), row=1, col=1)
 
     fig.show()
 
@@ -94,7 +90,7 @@ def getPrice(idx, step, minPrice):
 
 
 def _test():
-    df = pd.read_csv(path)[-500:-50]
+    df = pd.read_csv(TEST_PATH)[-500:-50]
     df['price'] = (df['high'] + df['low']) / 2
 
     res = getVP(df)

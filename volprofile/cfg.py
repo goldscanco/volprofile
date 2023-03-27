@@ -1,1 +1,1 @@
-path = "~/Downloads/data/tickers_data/test.csv"
+TEST_PATH = "~/Downloads/data/tickers_data/test.csv"
