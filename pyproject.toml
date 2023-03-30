@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "volprofile"
-version = "0.1.7"
+version = "0.1.8"
 description = "calculate the volume profile in a flexible manner!"
 authors = ["maghrebi <sajad.faghfoor@gmail.com>"]
 readme = "README.md"
