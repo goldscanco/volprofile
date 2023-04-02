@@ -1,1 +1,1 @@
-from .main import getVP, plot, getKMaxBars, getUnusualIncreasingBars
+from .main import getVP, plot, getKMaxBars, getUnusualIncreasingBars, getVPWithOHLC
