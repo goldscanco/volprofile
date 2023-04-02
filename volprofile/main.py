@@ -1,4 +1,3 @@
-
 import plotly.graph_objects as go
 import numpy as np
 import pandas as pd
@@ -38,8 +37,53 @@ def getVP(df: pd.DataFrame, nBins: int = 20):
     return res
 
 
-def getKMaxBars(df: pd.DataFrame, k: int):
-    return df.nlargest(k, ['aggregateVolume'])
+def getVPWithOHLC(df: pd.DataFrame, nBins: int = 20):
+    """
+    parameters:
+        - df: columns (open high low close volume etc.)
+    Returns:
+        - (pd.DataFrame): consists of `minPrice` and
+        `maxPrice` and `aggregateVolume`
+    """
+    precision_multiplier = 5
+    volume_seri = df['volume'].to_numpy()
+    high_seri = df['high'].to_numpy()
+    low_seri = df['low'].to_numpy()
+
+    minPrice, maxPrice = np.min(low_seri), np.max(high_seri)
+
+    # 5 in the next line would increase the precision of final results
+    # in the last step before returning must convert it again to nBins
+    step = (maxPrice - minPrice) / (precision_multiplier * nBins)
+    max_idxs = (high_seri - minPrice) // step
+    min_idxs = (low_seri - minPrice) // step
+
+    min_idxs[min_idxs >= nBins * precision_multiplier] = nBins * precision_multiplier - 1
+    max_idxs[max_idxs >= nBins * precision_multiplier] = nBins * precision_multiplier - 1
+
+    volumes = [0] * nBins * precision_multiplier
+    res: pd.DataFrame = pd.DataFrame(
+        columns=['minPrice', 'maxPrice', 'aggregateVolume'])
+
+    for i, min_idx in enumerate(min_idxs):
+        for j in range(int(min_idx), int(max_idxs[i]) + 1):
+            volumes[j] += volume_seri[i] / (-int(min_idx) + int(max_idxs[i]) + 1)
+
+    reducedSumVolumes = np.add.reduceat(volumes, np.arange(0, len(volumes), precision_multiplier))
+    step = step * precision_multiplier
+    if len(reducedSumVolumes) != nBins:
+        raise Exception("length of reduced volumes not consistent with number of bins")
+
+    for i in range(nBins):
+        res.loc[i] = [getPrice(i, step, minPrice) - step / 2,
+                      getPrice(i, step, minPrice) + step / 2,
+                      reducedSumVolumes[i]]
+
+    return res
+
+
+def getKMaxBars(volprofile_result: pd.DataFrame, k: int):
+    return volprofile_result.nlargest(k, ['aggregateVolume'])
 
 
 def getUnusualIncreasingBars(df: pd.DataFrame, isUpward: bool):
@@ -78,8 +122,12 @@ def _test():
     df['price'] = (df['high'] + df['low']) / 2
 
     res = getVP(df)
-    # print(getUnusualIncreasingBars(res, False))
     plot(res, df.price)
+
+    res = getVPWithOHLC(df)
+    plot(res, df.price)
+
+
 
 
 if __name__ == "__main__":
